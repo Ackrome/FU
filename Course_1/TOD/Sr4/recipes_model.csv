@@ -1,0 +1,17 @@
+recipe	name	varchar(100)	Y	Рецепт	Название рецепта			
+recipe	id	serial	N	Рецепт	ID рецепта	PK		
+recipe	minutes	int	Y	Рецепт	Длительность выполнения в минутах			
+recipe	contributor_id	int	Y	Рецепт	ID автора рецепта	FK	user	id
+recipe	submitted	timestamp	Y	Рецепт	Дата добавления			
+recipe	n_steps	int	N	Рецепт	Кол-во шагов рецепта			
+recipe	description	text	N	Рецепт	Описание рецепта			
+recipe	n_ingredients	int	N	Рецепт	Кол-во ингредиентов в рецепта			
+review	id	serial	Y	Отзыв	ID отзыва	PK		
+review	user_id	int	Y	Отзыв	ID автора отзыва	FK		
+review	recipe_id	int	Y	Отзыв	ID рецепта	FK	recipe	id
+review	date	timestamp	Y	Отзыв	Дата добавления отзыва			
+review	rating	int	Y	Отзыв	Рейтинг отзыва			
+review	review	test	N	Отзыв	Текстовое описание отзыва			
+user	id	serial	Y	Пользователь	ID пользователя	PK		
+user	login	varchar(20)	Y	Пользователь	Логин пользователя			
+user	registered	timestamp	Y	Пользователь	Дата регистрации пользователя			

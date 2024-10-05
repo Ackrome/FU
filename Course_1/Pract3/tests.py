@@ -1,0 +1,1 @@
+print('qwertyuiop'[-3:])
