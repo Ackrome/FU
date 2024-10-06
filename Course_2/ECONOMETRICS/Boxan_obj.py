@@ -161,6 +161,7 @@ class BoxAn:
                 break
         self.data=data
         self.corr_matrix()
+        return k_flag
         
     def drop_too_correlated_no_breaks(self,data=pd.DataFrame(),y_col=0, max_correl=0.7):
         if data.shape==(0,0):
@@ -171,10 +172,9 @@ class BoxAn:
         for i in range(1,len(cor_df.columns)):
             for j in range(i+1,len(cor_df.columns)):
                 if cor_df.iloc[i,j]>=max_correl:
-                    try:
-                        data.pop(*cor_df[cor_df.iloc[:,y_col]==min(cor_df.iloc[y_col,i],cor_df.iloc[y_col,j])].index)
-                    except:
-                        pass
+                    data.pop(*cor_df[cor_df.iloc[:,y_col]==min(cor_df.iloc[y_col,i],cor_df.iloc[y_col,j])].index)
+
+                    
         self.data=data
         self.corr_matrix()
     
@@ -183,8 +183,19 @@ class BoxAn:
             data=self.data
             
         for i in range(times):
-            self.drop_too_correlated(data,y_col, max_correl)
-                       
+            k = self.drop_too_correlated(data,y_col, max_correl)
+            if k==0:
+                break
+            
+    def drop_too_correlated_till_end(self,data=pd.DataFrame(),y_col=0, max_correl=0.7):
+        if data.shape==(0,0):
+            data=self.data
+            
+        k=1
+        while k!=0:
+            k = self.drop_too_correlated(data,y_col, max_correl)
+
+            
     def corr_type(self,r)->str:
         
         ans=''
@@ -210,7 +221,7 @@ class BoxAn:
     def t_test(self,data=pd.DataFrame,col1=0,col2=1,untrust=0.05):
         return scipy.stats.ttest_rel(data.iloc[:, col1], data.iloc[:, col2])[1] < untrust
 
-    def define_corr(self,data=pd.DataFrame(),y_col=0,x_col=1,prin=True)->str:
+    def define_corr(self,data=pd.DataFrame(),y_col=0,x_col=1,prin=True, do_ttest=True)->str:
         
         if data.shape==(0,0):
             data=self.data
@@ -218,10 +229,10 @@ class BoxAn:
         r=data.iloc[:,x_col].corr( data.iloc[:,y_col])
         names=data.columns
         ans=self.corr_type(r)
-        
-        if self.t_test(data,y_col,x_col):
+        if do_ttest:
+            if self.t_test(data,y_col,x_col):
                 ans += f'(коэффициент корреляции {r:.3f} - статистически значим)'
-        else:
+            else:
                 ans += f'(коэффициент корреляции {r:.3f} - статистически не значим)'
                 
         if prin:
@@ -229,17 +240,19 @@ class BoxAn:
         else:
             return ans
         
-    def correlations(self,data=pd.DataFrame()):
+    def correlations(self,data=pd.DataFrame(),only_y=False, do_ttest=True):
     
         if data.shape==(0,0):
             data=self.data
         
         cor_df=data.corr()
-        
-        for i in range(len(cor_df.columns)):
-            for j in range(i+1,len(cor_df.columns)):
-                
-                self.define_corr(y_col=i,x_col=j)
+        if only_y:
+            for j in range(1,len(cor_df.columns)):
+                self.define_corr(y_col=0,x_col=j,do_ttest=do_ttest)
+        else:
+            for i in range(len(cor_df.columns)):
+                for j in range(i+1,len(cor_df.columns)):
+                    self.define_corr(y_col=i,x_col=j,do_ttest=do_ttest)
         
     def sm_make_model(self,data=pd.DataFrame(),y_col=0):
         if data.shape==(0,0):
@@ -301,7 +314,7 @@ class BoxAn:
         ax.plot(sorted(data.iloc[:,y_col]),y_, color='green')
         plt.show()
         
-    def complex_analysys(self,drop_y=0, replace_to_median=0):
+    def complex_analysis(self,drop_y=0, replace_to_median=0):
         print('Проанализируем ряды данных.')
         self.boxplots()
         t=''
@@ -317,9 +330,8 @@ class BoxAn:
 Данные можно сократить, т.к. существуют внешние факторы, не входящие в модель.
             '''
             self.remove_bad_data_x_times(times=replace_to_median)
-        print(t)
-        if len(t):
-            self.boxplots()
+            
+        self.boxplots()
         
         print('Построим диаграммы рассеяния Y с регрессорами.')
         self.scatterplots(lines=True)
@@ -327,7 +339,7 @@ class BoxAn:
         
         print('Построим корреляционную матрицу и проведем ее анализ.')
         self.corr_matrix()
-        self.drop_too_correlated_no_breaks()
+        self.drop_too_correlated_till_end()
         self.correlations()
         
         print('Построим модель со значимыми факторами. Факторы отберем методом пошагового отбора.')
@@ -338,3 +350,5 @@ class BoxAn:
         
         print(f'Найдем детерминант модели {self.sl_make_model()}.\nИ построим график регрессии')
         self.sl_plot()
+        
+        
