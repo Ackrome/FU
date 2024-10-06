@@ -301,15 +301,16 @@ class BoxAn:
         self.lin_model = LinearRegression().fit(self.data.iloc[:,y_col+1:],self.data.iloc[:,y_col])
         return self.lin_model.score(self.data.iloc[:,y_col+1:],self.data.iloc[:,y_col])
     
-    def sl_plot(self,data=pd.DataFrame(),y_col=0):
+    def sl_plot(self,data=pd.DataFrame(),y_col=0, only_y=True):
         if data.shape==(0,0):
             data=self.data       
         fig,ax = plt.subplots(1,figsize=(7,7))
         
         y_ = self.lin_model.predict(self.data.iloc[:,y_col+1:])
         
-        for i in range(1,len(data.columns)):
-            ax.scatter(data.iloc[:,y_col],data.iloc[:,i])
+        if not(only_y):
+            for i in range(1,len(data.columns)):
+                ax.scatter(data.iloc[:,y_col],data.iloc[:,i])
 
         ax.plot(sorted(data.iloc[:,y_col]),y_, color='green')
         plt.show()
