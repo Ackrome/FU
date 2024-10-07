@@ -88,6 +88,9 @@ rgbs=(np.stack((np.arange(0,256),np.arange(0,256),np.arange(255,-1,-1)), axis=0)
 
 root = Tk()
 
+#Scales
+
+##Params
 s = Scale(root,label='s', from_=-20, to=20, orient=HORIZONTAL,length = size,digits = 4,resolution =   0.001,var=DoubleVar(value=10) )
 s.grid(row=0,column=0)
 r = Scale(root,label='r', from_=-50, to=50, orient=HORIZONTAL,length = size,digits = 4,resolution =   0.001,var=DoubleVar(value=28) )
@@ -95,6 +98,7 @@ r.grid(row=1,column=0)
 b = Scale(root,label='b', from_=-5, to=5, orient=HORIZONTAL,length = size,digits = 4,resolution =   0.001,var=DoubleVar(value=2.667) )
 b.grid(row=2,column=0)
 
+##Start coords
 x = Scale(root,label='x', from_=-10, to=10, orient=HORIZONTAL,length = size,digits = 4,resolution =   0.001,var=DoubleVar(value=0) )
 x.grid(row=0,column=1)
 y = Scale(root,label='y', from_=-10, to=10, orient=HORIZONTAL,length = size,digits = 4,resolution =   0.001,var=DoubleVar(value=1) )
