@@ -41,6 +41,10 @@ class Model(object):
             step += 1
             steps.append(step)
             errors.append(new_err)
+            
+        self.errors=errors
+        self.steps=steps
+        
         stop_time=dt.time()
         self.study_time_seconds = stop_time-start_time
         
@@ -55,6 +59,10 @@ class Model(object):
         plt.scatter(yy,Y)
         plt.plot(yy,yy,c='r')
         plt.show()
+    
+    def study_plot(self):
+        plt.plot(self.steps,self.errors)
+        plt.show
     
     def score(self, Y,X=pd.DataFrame() ):
         y_pred = self.predict()
@@ -96,4 +104,5 @@ Study Time = {self.study_time_seconds*1000} ms
     def complex_out(self,x,y):
         self.fit(x, y)
         self.plot(y)
+        self.study_plot()
         self.show_metrics(y)
