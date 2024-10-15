@@ -153,7 +153,7 @@ class BoxAn:
         k_flag=0
         for i in range(1,len(cor_df.columns)):
             for j in range(i+1,len(cor_df.columns)):
-                if cor_df.iloc[i,j]>=max_correl:
+                if abs(cor_df.iloc[i,j])>=max_correl:
                     data.pop(*cor_df[cor_df.iloc[:,y_col]==min(cor_df.iloc[y_col,i],cor_df.iloc[y_col,j])].index)
                     k_flag=1
                     break
