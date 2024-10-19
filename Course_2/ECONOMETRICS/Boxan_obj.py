@@ -9,7 +9,115 @@ import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
+class Model(object):
+    """Модель линейной регрессии"""
+    def __init__(self, shape,alpha=0.01,max_steps=1000):
+        """Initialize Model
 
+        Args:
+            shape (tuple-like): shape of X dataset
+        """
+        
+        self.shape = shape
+        self.alpha=alpha
+        self.max_steps=max_steps
+        self.b = np.zeros([self.shape[1] + 1, 1])
+        self.x0 = pd.DataFrame({'x0': np.ones(self.shape[0])})
+        
+    def predict(self, X=pd.DataFrame()):
+        if X.shape==(0,0):
+            X=self.x_all
+        
+        return X @ self.b
+    
+    def error(self,Y,X=pd.DataFrame()):
+        if X.shape==(0,0):
+            X=self.x_all
+            
+        return 1/(2*self.shape[0]) * (Y - self.predict(X)).T @ (Y - self.predict(X))
+    
+    def fit(self, X, Y, accuracy=0.01):
+        alpha=self.alpha
+        max_steps=self.max_steps
+        start_time = dt.time()
+        x_all = pd.concat([self.x0, X], axis=1)
+        self.x_all = x_all
+        steps, errors = [], []
+        step = 0
+        for _ in range(max_steps):
+            dJ_b = -1/self.shape[0] * x_all.T @ (Y - self.predict(x_all))
+            self.b -= alpha * dJ_b
+            new_err = self.error(Y).iloc[0,0]
+            step += 1
+            steps.append(step)
+            errors.append(new_err)
+            
+        self.errors=errors
+        self.steps=steps
+        
+        stop_time=dt.time()
+        self.study_time_seconds = stop_time-start_time
+        
+        return steps, errors, self.b
+    
+    
+    def plot(self, Y,X=pd.DataFrame()):
+        if X.shape==(0,0):
+            X=self.x_all
+
+        yy=self.predict()
+        plt.scatter(yy,Y)
+        plt.plot(yy,yy,c='r')
+        plt.show()
+    
+    def study_plot(self):
+        plt.plot(self.steps,self.errors)
+        plt.show()
+    
+    def score(self, Y,X=pd.DataFrame() ):
+        y_pred = np.array(self.predict())
+        Y=np.array(Y)
+        ss_res = np.sum((Y - y_pred)**2)
+        ss_total = np.sum((Y - np.mean(Y))**2)
+        r2 = 1 - (ss_res / ss_total)
+        return r2
+
+    def MSE(self, Y,X=pd.DataFrame() ):
+        Y_pred = self.predict()
+        MSE = np.mean((Y_pred - Y)**2)
+        return MSE
+
+    def RMSE(self, Y,X=pd.DataFrame() ):
+        return np.sqrt(self.MSE(Y))
+
+    def MAE(self, Y,X=pd.DataFrame() ):
+        Y_pred = self.predict()
+        MAE = np.mean(abs(Y_pred - Y))
+        return MAE
+
+    def MAPE(self, Y,X=pd.DataFrame() ):
+        Y_pred = self.predict()
+        MAPE = np.mean(abs(Y_pred - Y)/Y)*100
+        return MAPE
+    
+    def show_metrics(self, y,X=pd.DataFrame() ):
+        text=f'''
+Error after gradient descent = {self.error(y).iloc[0,0]}
+Mean Absolute Percentage Error = {round(self.MAPE(y),2)}%
+R2 Score = {round(self.score(y),4)}
+Root of Mean Squared Error = {round(self.RMSE(y),2)}
+Mean Squared Error = {round(self.MSE(y),2)}
+Mean Absolute Error = {round(self.MAE(y),2)}
+Study Time = {self.study_time_seconds*1000} ms
+        '''
+        print(text)
+    
+    def complex_out(self,x,y,show_plots=True):
+        self.fit(x, y)
+        if show_plots:
+            self.plot(y)
+            self.study_plot()
+        self.show_metrics(y)
 class BoxAn:
     def __init__(self,data:pd.DataFrame,from_col=0,till_col=None,y_col=0,from_col_x=1):
         self.data=data.iloc[:,from_col:till_col]
@@ -298,9 +406,16 @@ class BoxAn:
     def sl_make_model(self,data=pd.DataFrame(),y_col=0):
         if data.shape==(0,0):
             data=self.data
+             
         self.lin_model = LinearRegression().fit(self.data.iloc[:,y_col+1:],self.data.iloc[:,y_col])
         return self.lin_model.score(self.data.iloc[:,y_col+1:],self.data.iloc[:,y_col])
     
+    def me_make_model(self,data=pd.DataFrame(),y_col=0):
+        if data.shape==(0,0):
+            data=self.data
+        self.my_model = Model(data.iloc[:,y_col+1:].shape)
+        self.my_model.complex_out(data.iloc[:,y_col+1:], data.iloc[:,y_col])
+        
     def sl_plot(self,data=pd.DataFrame(),y_col=0, only_y=True):
         if data.shape==(0,0):
             data=self.data       
@@ -310,9 +425,9 @@ class BoxAn:
         
         if not(only_y):
             for i in range(1,len(data.columns)):
-                ax.scatter(data.iloc[:,y_col],data.iloc[:,i])
+                        ax.scatter(y_,self.data.iloc[:,y_col])
+                        ax.plot(y_,y_,c='r')
 
-        ax.plot(sorted(data.iloc[:,y_col]),y_, color='green')
         plt.show()
         
     def complex_analysis(self,drop_y=0, replace_to_median=0):
@@ -351,5 +466,8 @@ class BoxAn:
         
         print(f'Найдем детерминант модели {self.sl_make_model()}.\nИ построим график регрессии')
         self.sl_plot()
+        
+        print('Попробуем сделать то же самое, но на моей модели')
+        self.me_make_model()
         
         
