@@ -190,10 +190,10 @@ button = tk.Button(root, text="Подтвердить выбор", command=show_
 button.pack(pady=10)
 
 
-s = tk.Scale(root,label='s', from_=10, to=400, orient=tk.HORIZONTAL,digits = 4,resolution =   0.001,var=tk.DoubleVar(value=10) )
+s = tk.Scale(root,label='s', from_=10, to=1000, orient=tk.HORIZONTAL,digits = 4,resolution =   0.001,var=tk.DoubleVar(value=10) )
 s.pack(pady=30)
 
-speed=s.get()
+speed=(s.get())**2
 
 label = tk.Label(root, text="")
 label.pack(pady=10)
