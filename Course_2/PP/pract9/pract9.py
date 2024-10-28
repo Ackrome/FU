@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import numpy as np
 from  tqdm.notebook import tqdm
 from random import randint
@@ -8,7 +9,7 @@ import time
 ##############################################################################################
 # Константы
 ##############################################################################################
-WIDTH=HEIGHT = 30  # Размеры сетки
+WIDTH=HEIGHT = 70  # Размеры сетки
 CELL_SIZE = 10  # Размер клетки в пикселях
 WIDTH = WIDTH//2 *2+1
 HEIGHT = HEIGHT//2 *2+1
@@ -23,7 +24,13 @@ PATH_COLOR = "pink"
 FINAL_COLOR = "yellow"
 VISITED_COLOR = "blue"
 OPEN_COLOR = 'lightgreen'
-speed=10
+
+# Создаем лабиринт с пустыми клетками и стенами]
+start = (0, 0)  # Начальная точка
+end = (HEIGHT - 1, WIDTH - 1)  # Целевая точка 
+# Визуализация с помощью Tkinter
+
+algo_list=['a_star','b_star']
 ##############################################################################################
 # Сгенерируем поляну
 ##############################################################################################
@@ -158,47 +165,78 @@ def show_popup(text="Уведомление",geometry="200x100+500+300",color='b
     label = tk.Label(popup, text=text, font=("Times New Roman", 20), fg=color)
     label.pack(pady=20)
     
-    # Закрытие окна через 3 секунды
+    # Закрытие по нажатии Enter
     popup.bind("<Return>", lambda event: popup.destroy())
+    
+def show_selected():
+    global algorythm
+    selected_option = combo.get()
+    label.config(text=f"Вы выбрали: {selected_option}")
+    if selected_option in algo_list:
+        root.destroy()
+        algorythm=selected_option
 ##############################################################################################
 # Визуализация
 ##############################################################################################
-# Создаем лабиринт с пустыми клетками и стенами]
-start = (0, 0)  # Начальная точка
-end = (HEIGHT - 1, WIDTH - 1)  # Целевая точка 
-# Визуализация с помощью Tkinter
+
+root = tk.Tk()
+root.title('Choose an Algorythm')
+
+combo = ttk.Combobox(root, values=algo_list)
+combo.set("Выберите алгоритм")  # Устанавливаем начальное значение
+combo.pack(pady=20)
+
+button = tk.Button(root, text="Подтвердить выбор", command=show_selected)
+button.pack(pady=10)
 
 
-# Запуск алгоритма A*
-found = False
-while found!=True:
-    root = tk.Tk()
-    root.title("A* Pathfinding Visualization")
+s = tk.Scale(root,label='s', from_=10, to=400, orient=tk.HORIZONTAL,digits = 4,resolution =   0.001,var=tk.DoubleVar(value=10) )
+s.pack(pady=30)
 
-    canvas = tk.Canvas(root, width=WIDTH * CELL_SIZE, height=HEIGHT * CELL_SIZE)
-    canvas.pack()
+speed=s.get()
+
+label = tk.Label(root, text="")
+label.pack(pady=10)
 
 
-    maze=generate_maze(minus_wealls)
+time.sleep(0.3)
+root.mainloop()
 
-    for i in range(HEIGHT):
-        for j in range(WIDTH):
-            
-            color = EMPTY_COLOR if maze[i][j].if_not_wall==1 else WALL_COLOR
-            rect = canvas.create_rectangle(j*CELL_SIZE,i  * CELL_SIZE,(j + 1) * CELL_SIZE, (i + 1) * CELL_SIZE,fill=color, outline="gray")
-            maze[i][j].rect_obj = rect
 
-    # Обозначаем начальную и конечную точки
-    sx, sy = start
-    ex, ey = end
-    canvas.itemconfig(maze[sy][sx].rect_obj, fill=START_COLOR)
-    canvas.itemconfig(maze[ey][ex].rect_obj, fill=END_COLOR)
-    path = a_star(start, end)   
-    if path:
-        draw_path(path)
-        show_popup("Путь найден", color='green')
-        root.mainloop()
-        break
-    else:
-        found=False
-        root.destroy()
+    
+if algorythm=='a_star':
+    # Запуск алгоритма A*
+    found = False
+    while found!=True:
+        root = tk.Tk()
+        root.title("A* Pathfinding Visualization")
+
+        canvas = tk.Canvas(root, width=WIDTH * CELL_SIZE, height=HEIGHT * CELL_SIZE)
+        canvas.pack()
+
+
+        maze=generate_maze(minus_wealls)
+
+        for i in range(HEIGHT):
+            for j in range(WIDTH):
+                
+                color = EMPTY_COLOR if maze[i][j].if_not_wall==1 else WALL_COLOR
+                rect = canvas.create_rectangle(j*CELL_SIZE,i  * CELL_SIZE,(j + 1) * CELL_SIZE, (i + 1) * CELL_SIZE,fill=color, outline="gray")
+                maze[i][j].rect_obj = rect
+
+        # Обозначаем начальную и конечную точки
+        sx, sy = start
+        ex, ey = end
+        canvas.itemconfig(maze[sy][sx].rect_obj, fill=START_COLOR)
+        canvas.itemconfig(maze[ey][ex].rect_obj, fill=END_COLOR)
+        path = a_star(start, end)   
+        if path:
+            draw_path(path)
+            show_popup("Путь найден", color='green')
+            root.mainloop()
+            break
+        else:
+            found=False
+            root.destroy()
+elif algorythm=='b_star':
+    pass
