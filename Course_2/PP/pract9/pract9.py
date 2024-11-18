@@ -6,6 +6,25 @@ from random import randint
 from scipy.stats import uniform
 from heapq import heappop, heappush
 import time
+import os
+import re
+##############################################################################################
+# Поиск всех файлов с расширением .txt
+##############################################################################################
+# Шаблон для проверки
+pattern = r"^maze_\d+\.txt$"
+# Путь к директории
+directory = "./"
+# Список всех файлов
+txts = []
+try_number = 0
+# Вывод всех файлов с расширением .txt
+for file in os.listdir(directory):
+    if re.match(pattern, file):
+        try_number+=1
+    if file.endswith(".txt"):
+        txts.append(file)
+check_choic = 0
 ##############################################################################################
 # Константы
 ##############################################################################################
@@ -29,8 +48,8 @@ OPEN_COLOR = 'lightgreen'
 start = (0, 0)  # Начальная точка
 end = (HEIGHT - 1, WIDTH - 1)  # Целевая точка 
 # Визуализация с помощью Tkinter
-
 algo_list=['a_star','b_star']
+maze = []
 ##############################################################################################
 # Сгенерируем поляну
 ##############################################################################################
@@ -73,25 +92,31 @@ def generate_maze(size):
             if str((i,j)) in exclude_list:
                 maze[i][j].if_not_wall=0
     return maze
+
+def scan_maze(maze):
+    maze = [[Cell(j,i,maze[j,i]) for i in range(maze.shape[1])] for j in range(maze.shape[0])]
+    return maze
 ##############################################################################################
 # Перейдем к алгоритму A*
 ##############################################################################################
 def in_bounds(x, y):
     return 0 <= x < HEIGHT and 0 <= y < WIDTH
 
-def neighbors(x, y):
+def neighbors(x, y, HEIGHT, WIDTH):
     """ Возвращает соседние клетки (вверх, вниз, влево, вправо) """
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
         nx, ny = x + dx, y + dy
-        if 0 <= nx < HEIGHT and 0 <= ny < WIDTH:
+        if 0 <= ny < HEIGHT and 0 <= nx < WIDTH:
             yield ny, nx
             
 def heuristic(a, b):
     """ Эвристика: манхэттенское расстояние """
     return ((a[0] - b[0])**2 + (a[1] - b[1])**2)**0.5
 
-def a_star(start, goal):
+def a_star(start, goal, maze):
     """ Реализация алгоритма A* """
+    HEIGHT = maze.shape[0]
+    WIDTH = maze.shape[1]
     open_list = []
     heappush(open_list, (0, start))
     came_from = {}
@@ -113,7 +138,7 @@ def a_star(start, goal):
         canvas.itemconfig(maze[y][x].rect_obj, fill=VISITED_COLOR)
         root.update()
         
-        for neighbor in neighbors(x, y):
+        for neighbor in neighbors(x, y, HEIGHT, WIDTH):
             ny, nx = neighbor
             if maze[ny][nx].if_not_wall == 0:  # Если стена, пропускаем
                 continue
@@ -165,16 +190,52 @@ def show_popup(text="Уведомление",geometry="200x100+500+300",color='b
     label = tk.Label(popup, text=text, font=("Times New Roman", 20), fg=color)
     label.pack(pady=20)
     
+    button = tk.Button(root, text="Сохранить лабиринт?", command=save_maze)
+    button.pack(pady=10)
+    
+    
     # Закрытие по нажатии Enter
     popup.bind("<Return>", lambda event: popup.destroy())
     
 def show_selected():
     global algorythm
+    global maze
+    global check_choic
     selected_option = combo.get()
+    
     label.config(text=f"Вы выбрали: {selected_option}")
-    if selected_option in algo_list:
-        root.destroy()
-        algorythm=selected_option
+    check_choic = check_choice(file_choice.get())
+    if check_choic[0]:
+        label.config(text=f"Вы импортировали лабиринт: {file_choice.get()}")
+        
+        if selected_option in algo_list:
+            root.destroy()
+            algorythm=selected_option
+            
+def save_maze():
+    global maze
+    global try_number
+    with open(f"maze_{try_number}.txt", "w") as file:
+        for row in maze:
+            file.write(" ".join(map(lambda cell: str(cell.if_not_wall), row)) + "\n")
+            
+def check_choice(txt):
+    if txt in txts:
+        try_maze = []
+        with open(txt, "r") as file:
+            for line in file:
+                row = list(map(float, line.split()))
+                try_maze.append(row)
+            try_maze = np.array(try_maze)
+            return True, scan_maze(try_maze)
+            '''try:
+                try_maze = np.array(try_maze)
+                return True,scan_maze(try_maze)
+            except:
+                print(try_maze.shape)
+                return False, 0'''
+    if txt == "Выберите txt файл для импортирования лабиринта":
+        return True, generate_maze(minus_wealls)
 ##############################################################################################
 # Визуализация
 ##############################################################################################
@@ -185,6 +246,10 @@ root.title('Choose an Algorythm')
 combo = ttk.Combobox(root, values=algo_list)
 combo.set("Выберите алгоритм")  # Устанавливаем начальное значение
 combo.pack(pady=20)
+
+file_choice = ttk.Combobox(root, values=txts)
+file_choice.set("Выберите txt файл для импортирования лабиринта")  # Устанавливаем начальное значение
+file_choice.pack(pady=20)
 
 button = tk.Button(root, text="Подтвердить выбор", command=show_selected)
 button.pack(pady=10)
@@ -208,17 +273,23 @@ if algorythm=='a_star':
     # Запуск алгоритма A*
     found = False
     while found!=True:
+        
+        maze = np.array(check_choic[1])
+        HEIGHT = maze.shape[0]
+        WIDTH = maze.shape[1]
+        end = ( maze.shape[1] - 1,maze.shape[0] - 1)  # Целевая точка 
+
+        
         root = tk.Tk()
         root.title("A* Pathfinding Visualization")
 
-        canvas = tk.Canvas(root, width=WIDTH * CELL_SIZE, height=HEIGHT * CELL_SIZE)
+        canvas = tk.Canvas(root, width=maze.shape[1] * CELL_SIZE, height=maze.shape[0] * CELL_SIZE)
         canvas.pack()
 
-
-        maze=generate_maze(minus_wealls)
-
-        for i in range(HEIGHT):
-            for j in range(WIDTH):
+        
+        
+        for i in range(maze.shape[0]):
+            for j in range(maze.shape[1]):
                 
                 color = EMPTY_COLOR if maze[i][j].if_not_wall==1 else WALL_COLOR
                 rect = canvas.create_rectangle(j*CELL_SIZE,i  * CELL_SIZE,(j + 1) * CELL_SIZE, (i + 1) * CELL_SIZE,fill=color, outline="gray")
@@ -229,7 +300,7 @@ if algorythm=='a_star':
         ex, ey = end
         canvas.itemconfig(maze[sy][sx].rect_obj, fill=START_COLOR)
         canvas.itemconfig(maze[ey][ex].rect_obj, fill=END_COLOR)
-        path = a_star(start, end)   
+        path = a_star(start, end, maze)   
         if path:
             draw_path(path)
             show_popup("Путь найден", color='green')
@@ -237,6 +308,8 @@ if algorythm=='a_star':
             break
         else:
             found=False
+            show_popup("Путь не найден", color='red')
             root.destroy()
+            break
 elif algorythm=='b_star':
     pass
