@@ -1,9 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 import numpy as np
-from  tqdm.notebook import tqdm
-from random import randint
-from scipy.stats import uniform
 from heapq import heappop, heappush
 import time
 import os
@@ -81,7 +78,7 @@ def removeWall(cell_1,cell_2):
     maze[cell_1.x+add_x][cell_1.y+add_y].been_here=1
     maze[cell_1.x+add_x][cell_1.y+add_y].if_not_wall=1
     
-def generate_maze(size):
+def generate_maze(size,WIDTH,HEIGHT):
     maze = [[Cell(j,i,1) for i in range(WIDTH)] for j in range(HEIGHT)]
     m_cords=[str((i,j)) for i in range(HEIGHT) for j in range(WIDTH)]
     
@@ -97,7 +94,7 @@ def scan_maze(maze):
     maze = [[Cell(j,i,maze[j,i]) for i in range(maze.shape[1])] for j in range(maze.shape[0])]
     return maze
 ##############################################################################################
-# Перейдем к алгоритму A*
+# Перейдем к алгоритмам поиска пути
 ##############################################################################################
 def in_bounds(x, y):
     return 0 <= x < HEIGHT and 0 <= y < WIDTH
@@ -112,6 +109,53 @@ def neighbors(x, y, HEIGHT, WIDTH):
 def heuristic(a, b):
     """ Эвристика: манхэттенское расстояние """
     return ((a[0] - b[0])**2 + (a[1] - b[1])**2)**0.5
+
+def b_star(start, goal, maze):
+    """ Реализация алгоритма B* """
+    HEIGHT = maze.shape[0]
+    WIDTH = maze.shape[1]
+    open_list = []
+    heappush(open_list, (0, start))  # Начальная стоимость 0 для старта
+    came_from = {}
+    g_score = {start: 0}  # Стоимость пути от старта
+    f_score = {start: heuristic(start, goal)}  # Эвристическая стоимость до цели
+    
+    # Дополнительный параметр для учета статистики
+    probability = {start: 1.0}  # Вероятность для старта (начальная 1)
+
+    
+    color_iter=0
+    while open_list:
+        if color_iter%speed==0:
+            draw_list(list(zip(*open_list))[1])
+        color_iter+=1
+        _, current = heappop(open_list)
+        
+        if current == goal:
+            return reconstruct_path(came_from, current)
+        
+        y, x = current
+        canvas.itemconfig(maze[y][x].rect_obj, fill=VISITED_COLOR)
+        root.update()
+
+        for neighbor in neighbors(x, y, HEIGHT, WIDTH):
+            ny, nx = neighbor
+            if maze[ny][nx].if_not_wall == 0:  # Если стена, пропускаем
+                continue
+
+            tentative_g_score = g_score[current] + 1
+            tentative_prob = probability[current] * (1 - maze[ny][nx].if_not_wall)  # Учитываем вероятность
+
+            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                g_score[neighbor] = tentative_g_score
+                probability[neighbor] = tentative_prob
+                f_score[neighbor] = tentative_g_score + heuristic(neighbor, goal)
+                heappush(open_list, (f_score[neighbor], neighbor))
+                came_from[neighbor] = current
+
+    return []
+
+
 
 def a_star(start, goal, maze):
     """ Реализация алгоритма A* """
@@ -153,6 +197,8 @@ def a_star(start, goal, maze):
         
     
     return []
+
+
 
 def reconstruct_path(came_from, current):
     """ Восстанавливаем путь по пришедшим координатам """
@@ -220,6 +266,8 @@ def save_maze():
             file.write(" ".join(map(lambda cell: str(cell.if_not_wall), row)) + "\n")
             
 def check_choice(txt):
+    global WIDTH
+    global HEIGHT
     if txt in txts:
         try_maze = []
         with open(txt, "r") as file:
@@ -235,7 +283,7 @@ def check_choice(txt):
                 print(try_maze.shape)
                 return False, 0'''
     if txt == "Выберите txt файл для импортирования лабиринта":
-        return True, generate_maze(minus_wealls)
+        return True, generate_maze(minus_wealls, WIDTH, HEIGHT)
 ##############################################################################################
 # Визуализация
 ##############################################################################################
@@ -244,7 +292,7 @@ root = tk.Tk()
 root.title('Choose an Algorythm')
 
 combo = ttk.Combobox(root, values=algo_list)
-combo.set("Выберите алгоритм")  # Устанавливаем начальное значение
+combo.set("a_star")  # Устанавливаем начальное значение
 combo.pack(pady=20)
 
 file_choice = ttk.Combobox(root, values=txts)
@@ -308,8 +356,44 @@ if algorythm=='a_star':
             break
         else:
             found=False
-            show_popup("Путь не найден", color='red')
             root.destroy()
+            maze = generate_maze(minus_wealls, WIDTH, HEIGHT)
+            
+elif algorythm == 'b_star':
+    # Запуск алгоритма B*
+    found = False
+    while found != True:
+        
+        maze = np.array(check_choic[1])
+        HEIGHT = maze.shape[0]
+        WIDTH = maze.shape[1]
+        end = (maze.shape[1] - 1, maze.shape[0] - 1)  # Целевая точка 
+
+        root = tk.Tk()
+        root.title("B* Pathfinding Visualization")
+
+        canvas = tk.Canvas(root, width=maze.shape[1] * CELL_SIZE, height=maze.shape[0] * CELL_SIZE)
+        canvas.pack()
+
+        for i in range(maze.shape[0]):
+            for j in range(maze.shape[1]):
+                color = EMPTY_COLOR if maze[i][j].if_not_wall == 1 else WALL_COLOR
+                rect = canvas.create_rectangle(j * CELL_SIZE, i * CELL_SIZE, (j + 1) * CELL_SIZE, (i + 1) * CELL_SIZE, fill=color, outline="gray")
+                maze[i][j].rect_obj = rect
+
+        # Обозначаем начальную и конечную точки
+        sx, sy = start
+        ex, ey = end
+        canvas.itemconfig(maze[sy][sx].rect_obj, fill=START_COLOR)
+        canvas.itemconfig(maze[ey][ex].rect_obj, fill=END_COLOR)
+
+        path = b_star(start, end, maze)  # Используем алгоритм B*
+        if path:
+            draw_path(path)
+            show_popup("Путь найден", color='green')
+            root.mainloop()
             break
-elif algorythm=='b_star':
-    pass
+        else:
+            found = False
+            root.destroy()
+            maze = generate_maze(minus_wealls, WIDTH, HEIGHT)
