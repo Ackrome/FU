@@ -4,6 +4,20 @@ import collections
 ###################################################################################################
 class Cell():
     def __init__(self, figure,figure_color, X, Y):
+        """
+        Initialization of Cell class object
+        
+        Parameters
+        ----------
+        figure : str
+            The name of the figure
+        figure_color : int
+            The color of the figure (0 - none, 1 - white, 2 - black)
+        X : int
+            The X coordinate of the cell
+        Y : int
+            The Y coordinate of the cell
+        """
         self.figure = figure
         self.figure_color = figure_color # 0 - нет фигуры; 1 - белая фигура; 2 - чёрная фигура
         self.X = X
@@ -13,19 +27,89 @@ class Cell():
 ###################################################################################################
 class zero(Cell):
     def __str__(self):
+        """
+        Converts the object to string, using the coder dictionary to return the respective
+        unicode symbol for the figure.
+        
+        Returns
+        -------
+        str
+            The unicode symbol for the figure.
+        """
         if self.figure == '0':
             return str(coder[self.figure+'_'+str(self.figure_color)])
         return str(coder[str(self.figure)+'_'+str(self.figure_color)])
     def move(self,xod_data):
+        """
+        Attempts to move a zero piece on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, new_x, new_y, logic, player]
+
+        Returns
+        -------
+        tuple
+            A tuple indicating the result of the move.
+            Format: (int, logic, list)
+            Always returns (0, 0, []), as a zero piece cannot move.
+        """
+
         return 0,0,[]
     def predict(self, xod_data,eat=0):
+        """
+        Predicts the possible moves of a zero piece on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, logic, player]
+        eat : int, default=0
+            Whether to predict moves that involve eating a piece.
+
+        Returns
+        -------
+        list
+            A list of tuples, each representing a possible move.
+            Format: [(x, y), (x, y), ...]
+        """
         return []
 ###################################################################################################
 class pawn(Cell):
     def __str__(self):
+        """
+        Converts the pawn object to a string representation using the coder dictionary 
+        to return the respective unicode symbol for the figure.
+
+        Returns
+        -------
+        str
+            The unicode symbol for the figure.
+        """
         return str(coder[self.figure+'_'+str(self.figure_color)])  
     def move(self,xod_data):
-        
+        """
+        Makes a move for a pawn piece on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, new_x, new_y, logic, player]
+
+        Returns
+        -------
+        tuple
+            A tuple indicating the result of the move.
+            Format: (int, logic, list)
+            Possible return values:
+                0 - unsuccessful move
+                1 - successful move without eating
+                2 - successful move with eating
+        """
         eaten=[]
         cur_x = xod_data[0]
         cur_y=xod_data[1]
@@ -157,7 +241,23 @@ class pawn(Cell):
                 return 0,0,[]
             
     def predict(self,xod_data,eat=0):
-        
+        """
+        Predicts the possible moves of a pawn piece on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, logic, player]
+        eat : int, default=0
+            Whether to predict moves that involve eating a piece.
+
+        Returns
+        -------
+        list
+            A list of tuples, each representing a possible move.
+            Format: [(x, y), (x, y), ...]
+        """
         cur_x = xod_data[0]
         cur_y=xod_data[1]
         logic=xod_data[2]
@@ -214,9 +314,32 @@ class pawn(Cell):
 ###################################################################################################
 class rook(Cell):
     def __str__(self):
+        """
+        Converts the object to string, using the coder dictionary to return the respective
+        unicode symbol for the figure.
+        
+        Returns
+        -------
+        str
+            The unicode symbol for the figure.
+        """
         return str(coder[self.figure+'_'+str(self.figure_color)])  
     def move(self,xod_data):
-        
+        """
+        Executes a move for the rook on the board based on the given move data.
+
+        Parameters
+        ----------
+        xod_data : list
+            A list containing the current position, new position, the game logic, and the player.
+            Format: [cur_x, cur_y, new_x, new_y, logic, player]
+
+        Returns
+        -------
+        tuple
+            A tuple containing the status of the move, the updated game logic, and any eaten piece.
+            Status: 2 if a piece was eaten, 1 if the move was successful, 0 if the move was not successful.
+        """
         eaten=[]
         cur_x = xod_data[0]
         cur_y=xod_data[1]
@@ -256,7 +379,22 @@ class rook(Cell):
             return 0,0,[]
         
     def predict(self,xod_data,eat=0):
-        
+        """
+        Predicts all possible moves for a rook piece from (cur_x, cur_y) on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, logic, player]
+        eat : int, optional
+            Whether to look for eat moves or not.
+
+        Returns
+        -------
+        list of tuples
+            A list of possible moves for the piece.
+        """
         cur_x = xod_data[0]
         cur_y=xod_data[1]
         logic=xod_data[2]
@@ -349,9 +487,32 @@ class rook(Cell):
 ###################################################################################################
 class knight(Cell):
     def __str__(self):
+        """
+        Converts the knight object to a string representation using the coder dictionary.
+
+        Returns
+        -------
+        str
+            The unicode symbol representing the knight figure based on its color.
+        """
         return str(coder[self.figure+'_'+str(self.figure_color)])  
     def move(self,xod_data):
         
+        """
+        Attempts to move a knight piece from (cur_x, cur_y) to (new_x, new_y) on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, new_x, new_y, logic, player]
+
+        Returns
+        -------
+        tuple
+            A tuple indicating the result of the move.
+            Format: (int, logic, list)
+        """
         eaten=[]
         cur_x = xod_data[0]
         cur_y=xod_data[1]
@@ -389,6 +550,23 @@ class knight(Cell):
         
     def predict(self,xod_data,eat=0):
         
+        """
+        Predicts the possible moves of a knight piece on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, logic, player]
+        eat : int, default=0
+            Whether to predict moves that involve eating a piece.
+
+        Returns
+        -------
+        list
+            A list of tuples, each representing a possible move.
+            Format: [(x, y), (x, y), ...]
+        """
         cur_x = xod_data[0]
         cur_y=xod_data[1]
         logic=xod_data[2]
@@ -412,9 +590,37 @@ class knight(Cell):
 ###################################################################################################
 class bishop(Cell):
     def __str__(self):
+        """
+        Converts the bishop object to a string representation using the coder dictionary 
+        to return the respective unicode symbol for the figure.
+
+        Returns
+        -------
+        str
+            The unicode symbol for the bishop figure based on its color.
+        """
+
         return str(coder[self.figure+'_'+str(self.figure_color)])  
     def move(self,xod_data):
-        
+        """
+        Makes a move for a bishop piece on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, new_x, new_y, logic, player]
+
+        Returns
+        -------
+        tuple
+            A tuple indicating the result of the move.
+            Format: (int, logic, list)
+            Possible return values:
+                0 - unsuccessful move
+                1 - successful move without eating
+                2 - successful move with eating
+        """
         eaten=[]
         cur_x = xod_data[0]
         cur_y=xod_data[1]
@@ -524,7 +730,23 @@ class bishop(Cell):
         else:
             return 0,0,[]
     def predict(self,xod_data,eat=0):
-        
+        """
+        Predicts possible moves for a piece on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            Contains the current position and state of the game.
+            Format: [cur_x, cur_y, logic, player]
+        eat : int, optional
+            Indicates whether to look for capturing moves (default is 0).
+
+        Returns
+        -------
+        list
+            A list of tuples representing possible moves or capturing moves,
+            depending on the 'eat' parameter.
+        """
         cur_x = xod_data[0]
         cur_y=xod_data[1]
         logic=xod_data[2]
@@ -615,9 +837,31 @@ class bishop(Cell):
 ###################################################################################################
 class king(Cell):
     def __str__(self):
+        """
+        Converts the king object to a string representation using the coder dictionary 
+        to return the respective unicode symbol for the figure.
+
+        Returns
+        -------
+        str
+            The unicode symbol for the king figure based on its color.
+        """
         return str(coder[self.figure+'_'+str(self.figure_color)])  
     def move(self,xod_data):
-        
+        """
+        Moves the king to a new position on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            Contains the current position and state of the game.
+            Format: [cur_x, cur_y, new_x, new_y, logic, player]
+
+        Returns
+        -------
+        tuple
+            A tuple containing the move type (1 or 2), the new state of the board, and a list of eaten figures.
+        """
         eaten=[]
         cur_x = xod_data[0]
         cur_y=xod_data[1]
@@ -659,7 +903,23 @@ class king(Cell):
         else:
             return 0,0,[]
     def predict(self,xod_data,eat=0):
-        
+        """
+        Predicts the possible moves of a king piece on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, logic, player]
+        eat : int, default=0
+            Whether to predict moves that involve eating a piece.
+
+        Returns
+        -------
+        list
+            A list of tuples, each representing a possible move.
+            Format: [(x, y), (x, y), ...]
+        """
         cur_x = xod_data[0]
         cur_y=xod_data[1]
         logic=xod_data[2]
@@ -695,9 +955,33 @@ class king(Cell):
 ###################################################################################################
 class queen(Cell):
     def __str__(self):
+        """
+        Converts the queen object to a string representation using the coder dictionary 
+        to return the respective unicode symbol for the figure.
+
+        Returns
+        -------
+        str
+            The unicode symbol for the figure.
+        """
         return str(coder[self.figure+'_'+str(self.figure_color)])  
     def move(self,xod_data):
             
+        """
+        Moves a queen piece on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, new_x, new_y, logic, player]
+
+        Returns
+        -------
+        tuple
+            A tuple with the result of the move, the new game state, and the figure that was eaten.
+            Format: (int, list, list)
+        """
         eaten=[]
         cur_x = xod_data[0]
         cur_y=xod_data[1]
@@ -731,8 +1015,23 @@ class queen(Cell):
                 return 0,0,[]
         else:
             return 0,0,[]    
-    def predict(self,xod_data,eat=0):
-        
+    def predict(self,xod_data,eat=0):  
+        """
+        Predicts all possible moves for a queen piece from (cur_x, cur_y) on the board.
+
+        Parameters
+        ----------
+        xod_data : list
+            List containing move data and current game state.
+            Format: [cur_x, cur_y, logic, player]
+        eat : int, optional
+            Whether to look for eat moves or not.
+
+        Returns
+        -------
+        list of tuples
+            A list of possible moves for the piece.
+        """
         cur_x = xod_data[0]
         cur_y=xod_data[1]
         logic=xod_data[2]
@@ -934,24 +1233,37 @@ start_positions = tuple([
     tuple(['pawn_1' for i in range(8)]),
     tuple(['rook_1', 'knight_1', 'bishop_1',  'queen_1', 'king_1', 'bishop_1', 'knight_1', 'rook_1']),
 ])
-'''start_positions = tuple([
-    tuple(['rook_2', 'knight_2', 'bishop_2',  'queen_2','king_2', 'bishop_2', 'knight_2', 'rook_2']),
-    tuple(['0_0' for i in range(8)]),
-    tuple(['0_0' for i in range(8)]),
-    tuple(['0_0' for i in range(8)]),
-    tuple(['0_0' for i in range(8)]),
-    tuple(['0_0' for i in range(8)]),
-    tuple(['0_0' for i in range(8)]),
-    tuple(['rook_1', 'knight_1', 'bishop_1',  'queen_1', 'king_1', 'bishop_1', 'knight_1', 'rook_1']),
-])'''
 ###################################################################################################
 ### Класс поля
 ###################################################################################################
 class Field():
     def __init__(self, logic=None):
+        """
+        Initialize a new game field instance.
+
+        Parameters
+        ----------
+        logic : list of lists, optional
+            A two-dimensional list representing the game board. The default is None.
+
+        Attributes
+        ----------
+        logic : list of lists
+            A two-dimensional list representing the game board.
+        """
         self.logic = logic if logic else self.first_generation()
 
     def first_generation(self):
+        """
+        Method for generating the initial state of the board.
+
+        Generates a two-dimensional list representing the game board, based on the start_positions tuple.
+
+        Returns
+        -------
+        logic : list of lists
+            A two-dimensional list representing the initial state of the game board.
+        """
         logic = [[0 for i in range(8)] for j in range(8)] # <=== Логическое представление игрового поля, его модель
 
         for i in range(8):
@@ -961,6 +1273,23 @@ class Field():
         return logic
     
     def predict_danger(self, logic, play, l=0):
+        """
+        Predicts the positions that can be attacked by the opponent in the given turn.
+
+        Parameters
+        ----------
+        logic : list of lists
+            A two-dimensional list representing the game board.
+        play : int
+            The index of the player currently making the move (0 or 1).
+        l : int
+            The number of the move being made.
+
+        Returns
+        -------
+        list
+            A list of coordinates that can be attacked by the opponent in the given turn.
+        """
         eat_predict_list = []
         for row in range(8):
             for x in range(8):
@@ -976,6 +1305,31 @@ class Field():
                 
                 
     def render(self, moves, eaten,predictlist=[], eat_predictlist=[],danger_predictlist=[],chekking_list=[],linking_dict=dict()):
+        """
+        Renders the current state of the game board.
+
+        Parameters
+        ----------
+        moves : int
+            The number of the current move.
+        eaten : list of str
+            A list of eaten figures in the format 'figure_color', where 'color' is '1' for white and '2' for black.
+        predictlist : list of tuples, optional
+            A list of coordinates of possible moves without eating.
+        eat_predictlist : list of tuples, optional
+            A list of coordinates of possible moves with eating.
+        danger_predictlist : list of tuples, optional
+            A list of coordinates of figures that can be attacked.
+        chekking_list : list of tuples, optional
+            A list of coordinates of figures that can attack the king.
+        linking_dict : dict, optional
+            A dictionary of coordinates of figures that can attack the king.
+
+        Returns
+        -------
+        None
+        """
+        
         color=(moves)%2+1
         eaten_w=[]
         eaten_b=[]

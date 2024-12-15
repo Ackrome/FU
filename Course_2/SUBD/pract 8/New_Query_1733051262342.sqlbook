@@ -1,0 +1,133 @@
+-- SQLBook: Markup
+# Упражнение 1
+-- SQLBook: Markup
+## 1
+-- SQLBook: Code
+SELECT * FROM Users;
+
+SELECT * FROM Artists;
+
+SELECT * FROM Albums;
+
+SELECT * FROM Songs;
+
+SELECT * FROM Playlists;
+-- SQLBook: Markup
+## 2
+-- SQLBook: Code
+SELECT user_phone AS "Phone", username AS "User Name" FROM Users;
+
+SELECT artist_email AS "Email", country AS "Country" FROM Artists;
+
+SELECT album_name AS "Album Name", release_date AS "Release Date" FROM Albums;
+
+SELECT song_name AS "Song Name", duration AS "Duration" FROM Songs;
+
+SELECT playlist_name AS "Playlist Name", is_public AS "Is Public" FROM Playlists;
+
+SELECT username AS "User Name", registration_date AS "Registration Date"
+FROM Users
+WHERE registration_date = '2024-01-01';
+
+SELECT Artists.artist_name AS "Artist", Albums.album_name AS "Album"
+FROM Artists
+JOIN Albums ON Artists.artist_email = Albums.artist_email
+WHERE Artists.genre = 'Rock';
+
+SELECT song_name AS "Song Name", plays_count AS "Plays Count"
+FROM Songs
+WHERE plays_count > 100;
+
+SELECT Users.username AS "User Name", COUNT(Playlists.playlist_id) AS "Playlists Count"
+FROM Users
+LEFT JOIN Playlists ON Users.user_phone = Playlists.user_phone
+GROUP BY Users.username;
+
+SELECT username AS "User Name", email AS "Email"
+FROM Users
+WHERE username LIKE 'A%';
+-- SQLBook: Markup
+## 3
+-- SQLBook: Code
+SELECT DISTINCT registration_date AS "Registration Date"
+FROM Users;
+
+SELECT DISTINCT song_name AS "Song Name"
+FROM Songs;
+-- SQLBook: Markup
+# Упражнение 2
+-- SQLBook: Markup
+## 1
+-- SQLBook: Markup
+### а) два запроса с полными именами столбцов и таблиц;
+-- SQLBook: Code
+SELECT Songs.song_name, Albums.album_name
+FROM public.Songs
+JOIN public.Albums ON public.Songs.album_id = public.Albums.album_id;
+
+SELECT public.Artists.artist_name, public.Artists.genre
+FROM public.Artists;
+-- SQLBook: Markup
+### б) три запроса с арифметическими операторами;
+-- SQLBook: Code
+SELECT album_name, total_tracks * 2 AS "Double Tracks"
+FROM Albums;
+
+SELECT album_name, CURRENT_DATE - release_date AS "Days Since Release"
+FROM Albums;
+
+SELECT song_name, EXTRACT(EPOCH FROM duration) / 60 AS "Duration in Minutes"
+FROM Songs;
+-- SQLBook: Markup
+### в) три запроса с логическими операторами, в том числе с использованием круглых скобок; 
+-- SQLBook: Code
+SELECT artist_name, country
+FROM Artists
+WHERE country = 'USA' OR country = 'UK';
+
+
+SELECT playlist_name, created_date, is_public
+FROM Playlists
+WHERE created_date < '2023-01-01' OR NOT is_public;
+
+SELECT album_name, total_tracks, release_date
+FROM Albums
+WHERE total_tracks > 10 AND (release_date > '2000-01-01');
+-- SQLBook: Markup
+### в) один запрос со скалярным подзапросом;
+-- SQLBook: Code
+SELECT album_name, release_date
+FROM Albums
+WHERE release_date > (SELECT MIN(release_date) FROM Albums);
+-- SQLBook: Markup
+### г) семь запросов с разными приведениями типов (CAST используйте не менее, чем в 3 запросах);
+-- SQLBook: Code
+SELECT song_name, CAST(EXTRACT(EPOCH FROM duration) AS INTEGER) AS "Duration in Seconds"
+FROM Songs;
+
+SELECT album_id, CAST(album_id AS TEXT) AS "Album ID as Text"
+FROM Albums;
+
+SELECT CAST(CURRENT_DATE AS TEXT) AS "Current Date as Text";
+
+SELECT song_name, EXTRACT(EPOCH FROM duration) / 60 AS "Duration in Minutes"
+FROM Songs;
+
+SELECT album_id + total_tracks::INT AS "Sum"
+FROM Albums;
+
+SELECT playlist_id::TEXT AS "Playlist ID as Text"
+FROM Playlists;
+
+SELECT EXTRACT(YEAR FROM release_date) AS "Release Year"
+FROM Albums;
+-- SQLBook: Markup
+### д) 2 запроса на проверку эквивалентности выражений с учетом NULL.
+-- SQLBook: Code
+SELECT song_name, plays_count
+FROM Songs
+WHERE plays_count IS NULL OR plays_count IS NOT NULL;
+
+SELECT song_name, plays_count
+FROM Songs
+WHERE plays_count IS DISTINCT FROM NULL;

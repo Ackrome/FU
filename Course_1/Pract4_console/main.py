@@ -1,7 +1,9 @@
 import os
 import time
 from sys import exit
-CONST=' '
+from models_orig import *
+
+'''CONST=' '
 os.system('cls')
 while type(CONST)!=int:      
     try:
@@ -14,7 +16,8 @@ if CONST==1:
 elif CONST==0:
     from models_plus import *
 elif CONST==2:
-    from models_checkers import *
+    from models_checkers import *'''
+    
 ### ВАЖНО: 1 - белая фигура; 2 - чёрная фигура; 0 - нет фигуры
 ###################################################################################################
 ### Необходимые переменные
@@ -26,6 +29,25 @@ Transdict= {'A':0,'B':1,'C':2,'D':3,'E':4,'F':5,'G':6,'H':7}
 
 class Game(): 
     def __init__(self, eaten ,success):
+        """
+        Initialize a new game instance.
+
+        Args:
+            eaten (list): A list of eaten pieces.
+            success (int): The success status of the game.
+
+        Attributes:
+            field (Field): The game field.
+            player_1 (str): Name of the first player.
+            player_2 (str): Name of the second player.
+            success (int): The success status of the game.
+            eaten (list): A list of eaten pieces.
+            check_yes (int): A flag indicating if a check condition is present.
+            play (int): The current number of plays.
+            previous_logics (list): A list to store previous game logics.
+            previous_eaten (list): A list to store previous eaten pieces.
+        """
+
         self.field = Field()
         self.player_1 = input('Enter the first player: ')
         self.player_2 = input('Enter the second player: ')
@@ -38,13 +60,55 @@ class Game():
         self.previous_eaten.append(self.eaten[:])
     
     def __move(self,data):       
+        """
+        Private method to move a piece on the game field.
+
+        Args:
+            data (list): A list of parameters for the move, including the current
+                position, the new position, the game field, and the player.
+
+        Returns:
+            list: The result of the move, including the new positions of the pieces
+                that were moved.
+
+        """
+
         return self.field.logic[data[0]][data[1]].move(data)
     
     def __predict(self,data,eat=0):
+        """
+        Private method to predict possible moves for a piece on the game field.
+
+        Args:
+            data (list): A list of parameters for the prediction, including the
+                current position, the game field, and the player.
+            eat (int, optional): A flag indicating whether the prediction is for
+                a move that involves capturing an opponent's piece. Defaults to 0.
+
+        Returns:
+            list: A list of predicted positions that the piece can move to.
+        """
+
         return self.field.logic[data[0]][data[1]].predict(data,eat)
         
 
     def xod(self,data):
+        """
+        Executes a move in the game based on the provided data.
+
+        Args:
+            data (list): A list containing move parameters such as current position,
+                        new position, the game field, and the player.
+
+        Updates:
+            self.xod_data: The result of executing the move.
+            self.eaten: Extends with any pieces eaten in the move.
+            self.previous_eaten: Appends a copy of the current eaten list.
+            self.success: Updates the success status of the move.
+            self.field.logic: Updates to the new game field state after the move.
+            self.previous_logics: Appends the current state of the game field.
+        """
+
         self.xod_data = self.__move(data)
         
         self.eaten.extend(self.xod_data[2])
@@ -54,6 +118,28 @@ class Game():
         self.previous_logics.append(self.field.logic)
 
     def check_given_xod(self):
+        """
+        Checks if the given move is valid and executes it in the game.
+
+        This method is called in the main game loop to execute the moves entered by the user.
+        It checks if the move is valid, and if so, executes it in the game by calling the
+        xod method. If the move is not valid, it prints an error message and returns 0.
+
+        Args:
+            None
+
+        Returns:
+            int: The result of the move, including the success status of the move and
+                whether check was given.
+
+        Updates:
+            self.xod_data: The result of executing the move.
+            self.eaten: Extends with any pieces eaten in the move.
+            self.previous_eaten: Appends a copy of the current eaten list.
+            self.success: Updates the success status of the move.
+            self.field.logic: Updates to the new game field state after the move.
+            self.previous_logics: Appends the current state of the game field.
+        """
         old_logic=self.field.logic
         
         if self.check_yes >=2 or (len(self.field.predict_danger(old_logic,(self.play)%2+1,1))==8):
