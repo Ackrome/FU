@@ -16,8 +16,10 @@ class zero(Cell):
         if self.figure == '0':
             return str(coder[self.figure+'_'+str(self.figure_color)])
         return str(coder[str(self.figure)+'_'+str(self.figure_color)])
+    
     def move(self,xod_data):
         return 0,0,[]
+    
     def predict(self, xod_data,eat=0):
         return []
 ###################################################################################################
