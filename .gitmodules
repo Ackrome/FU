@@ -1,3 +1,6 @@
 [submodule "Course_2/PP/2/PPP_24-25_4sem"]
 	path = Course_2/PP/2/PPP_24-25_4sem
 	url = https://github.com/Ackrome/PPP_24-25_4sem
+[submodule "Course_2/Course-work-TabFPN"]
+	path = Course_2/Course-work-TabFPN
+	url = https://github.com/Ackrome/Course-work-TabFPN
