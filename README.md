@@ -1,6 +1,12 @@
 # Учебные материалы направления Прикладная Математика факультета ИТиАБД в Финансовом Университете при Правительстве РФ
-<img src="https://raw.githubusercontent.com/Ackrome/FU/main/images/_105-ai.png" align="right" width=450 height=230/>
-<img src="https://raw.githubusercontent.com/Ackrome/FU/main/images/pmiit.png" width=80 height=80/>
+<a href="https://www.fa.ru/">
+    <img src="https://raw.githubusercontent.com/Ackrome/FU/main/images/_105-ai.png" align="right" width=450 height=230/>
+</a>
+
+<a href="https://www.fa.ru/university/structure/scientific-educational-departments/itabd/">
+    <img src="https://raw.githubusercontent.com/Ackrome/FU/main/images/pmiit.png" width=80 height=80/>
+</a>
+
 
 >Неопределенность у нас связана с тем, что мы не знаем, сколько в третьей корзине этих грёбанных шаров!
 >
