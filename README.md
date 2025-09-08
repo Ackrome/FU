@@ -44,7 +44,7 @@
 
 
 #  Ссылки
-
+* [Книги и учебные пособия](https://github.com/Ackrome/FU/blob/main/books)
 * [Obsidian база знаний](https://github.com/kvdep/Abstracts)
 * [Интересная библиотека](https://github.com/Ackrome/matplobblib)
 * [Сайт Михаила Коротеева с курсом по Машинному обучению](https://koroteev.site/ml/)
