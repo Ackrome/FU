@@ -22,3 +22,5 @@
 * [Задачи по финансовой математике](https://github.com/Ackrome/FU/blob/main/books/%D0%91%D1%80%D1%83%D1%81%D0%BE%D0%B2%20%D1%84%D0%B8%D0%BD%20%D0%BC%D0%B0%D1%82.pdf)
 * [Финансовая математика (Конспект Лекций)](https://github.com/Ackrome/FU/blob/main/books/Brusov_P_N_Filatova_T_V_Orekhova_N_P_Brusov_P_P_Finansovaya_matematika.pdf)
 * [Азы Экономики. Мария Бойко](https://github.com/Ackrome/FU/blob/main/books/the_basics_of_Economics.pdf)
+
+* [Презентация по курсу Численные методы](https://github.com/Ackrome/FU/blob/main/books/Numerical%20Methods-2025%20(4).pdf)
