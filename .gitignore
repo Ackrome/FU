@@ -3,3 +3,7 @@
 **/wandb
 **/.git
 **/.env
+**/recipes*
+**/reviews*
+**/accounts*
+**/Walmart.csv
