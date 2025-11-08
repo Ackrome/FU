@@ -1,0 +1,67 @@
+// Computational graph for the feedforward sweep
+digraph NestedSequentialModel {
+	graph [label=<<B>NestedSequentialModel</B><br align='left'/>9 tensors total (16.6 KB)<br align='left'/>3700 params total (15.4 KB)<br align='left'/>> labeljust=left labelloc=t ordering=out rankdir=BT]
+	node [ordering=out]
+	input_1 [label=<<b>input_1</b><br/>16x15 (1.1 KB)<br/>@input.x> color=black fillcolor="#98FB98" fontcolor=black ordering=out shape=oval style="filled,solid"]
+	input_1 -> linear_1_1 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	linear_1_1 [label=<<b>linear_1_1</b><br/>16x64 (4.1 KB)<br/>params: 64x15, x64<br/>@layer1.0> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	relu_1_2 [label=<<b>relu_1_2</b><br/>16x64 (4.1 KB)<br/>@layer1.1> color=black fillcolor=white fontcolor=black ordering=out shape=box style="filled,solid"]
+	linear_2_3 [label=<<b>linear_2_3</b><br/>16x32 (2.1 KB)<br/>params: 32x64, x32<br/>@layer1.2> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	relu_2_4 [label=<<b>relu_2_4</b><br/>16x32 (2.1 KB)<br/>@layer1.3> color=black fillcolor=white fontcolor=black ordering=out shape=box style="filled,solid"]
+	relu_2_4 -> linear_3_5 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	linear_3_5 [label=<<b>linear_3_5</b><br/>16x16 (1.1 KB)<br/>params: 16x32, x16<br/>@layer2.0> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	relu_3_6 [label=<<b>relu_3_6</b><br/>16x16 (1.1 KB)<br/>@layer2.1> color=black fillcolor=white fontcolor=black ordering=out shape=box style="filled,solid"]
+	linear_4_7 [label=<<b>linear_4_7</b><br/>16x4 (384 B)<br/>params: 4x16, x4<br/>@layer2.2> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	linear_4_7 -> output_1 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	output_1 [label=<<b>output_1</b><br/>16x4 (384 B)<br/>@output> color=black fillcolor="#ff9999" fontcolor=black ordering=out shape=oval style="filled,solid"]
+	{
+		rank=sink
+		output_1
+	}
+	subgraph cluster_layer1_pass1 {
+		fillcolor=white label=<<B>@layer1</B><br align='left'/>(Sequential)<br align='left'/>> labelloc=b penwidth=5.0 style="filled,solid"
+		linear_1_1 -> relu_1_2 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+		relu_1_2 -> linear_2_3 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+		linear_2_3 -> relu_2_4 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	}
+	subgraph cluster_layer2_pass1 {
+		fillcolor=white label=<<B>@layer2</B><br align='left'/>(Sequential)<br align='left'/>> labelloc=b penwidth=5.0 style="filled,solid"
+		linear_3_5 -> relu_3_6 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+		relu_3_6 -> linear_4_7 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
+	}
+	subgraph cluster_layer1_pass1 {
+		subgraph "cluster_layer1.0_pass1" {
+			fillcolor=white label=<<B>@layer1.0</B><br align='left'/>(Linear)<br align='left'/>> labelloc=b penwidth=2.0 style="filled,dashed"
+		}
+	}
+	subgraph cluster_layer1_pass1 {
+		subgraph "cluster_layer1.1_pass1" {
+			fillcolor=white label=<<B>@layer1.1</B><br align='left'/>(ReLU)<br align='left'/>> labelloc=b penwidth=2.0 style="filled,dashed"
+		}
+	}
+	subgraph cluster_layer1_pass1 {
+		subgraph "cluster_layer1.2_pass1" {
+			fillcolor=white label=<<B>@layer1.2</B><br align='left'/>(Linear)<br align='left'/>> labelloc=b penwidth=2.0 style="filled,dashed"
+		}
+	}
+	subgraph cluster_layer1_pass1 {
+		subgraph "cluster_layer1.3_pass1" {
+			fillcolor=white label=<<B>@layer1.3</B><br align='left'/>(ReLU)<br align='left'/>> labelloc=b penwidth=2.0 style="filled,dashed"
+		}
+	}
+	subgraph cluster_layer2_pass1 {
+		subgraph "cluster_layer2.0_pass1" {
+			fillcolor=white label=<<B>@layer2.0</B><br align='left'/>(Linear)<br align='left'/>> labelloc=b penwidth=2.0 style="filled,dashed"
+		}
+	}
+	subgraph cluster_layer2_pass1 {
+		subgraph "cluster_layer2.1_pass1" {
+			fillcolor=white label=<<B>@layer2.1</B><br align='left'/>(ReLU)<br align='left'/>> labelloc=b penwidth=2.0 style="filled,dashed"
+		}
+	}
+	subgraph cluster_layer2_pass1 {
+		subgraph "cluster_layer2.2_pass1" {
+			fillcolor=white label=<<B>@layer2.2</B><br align='left'/>(Linear)<br align='left'/>> labelloc=b penwidth=2.0 style="filled,dashed"
+		}
+	}
+}
