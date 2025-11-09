@@ -1,10 +1,10 @@
 // Computational graph for the feedforward sweep
 digraph NestedSequentialModel {
-	graph [label=<<B>NestedSequentialModel</B><br align='left'/>9 tensors total (16.6 KB)<br align='left'/>3700 params total (15.4 KB)<br align='left'/>> labeljust=left labelloc=t ordering=out rankdir=BT]
+	graph [label=<<B>NestedSequentialModel</B><br align='left'/>9 tensors total (16.5 KB)<br align='left'/>3636 params total (15.1 KB)<br align='left'/>> labeljust=left labelloc=t ordering=out rankdir=BT]
 	node [ordering=out]
-	input_1 [label=<<b>input_1</b><br/>16x15 (1.1 KB)<br/>@input.x> color=black fillcolor="#98FB98" fontcolor=black ordering=out shape=oval style="filled,solid"]
+	input_1 [label=<<b>input_1</b><br/>16x14 (1.0 KB)<br/>@input.x> color=black fillcolor="#98FB98" fontcolor=black ordering=out shape=oval style="filled,solid"]
 	input_1 -> linear_1_1 [arrowsize=.7 color=black fontcolor=black labelfontsize=8 style=solid]
-	linear_1_1 [label=<<b>linear_1_1</b><br/>16x64 (4.1 KB)<br/>params: 64x15, x64<br/>@layer1.0> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
+	linear_1_1 [label=<<b>linear_1_1</b><br/>16x64 (4.1 KB)<br/>params: 64x14, x64<br/>@layer1.0> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
 	relu_1_2 [label=<<b>relu_1_2</b><br/>16x64 (4.1 KB)<br/>@layer1.1> color=black fillcolor=white fontcolor=black ordering=out shape=box style="filled,solid"]
 	linear_2_3 [label=<<b>linear_2_3</b><br/>16x32 (2.1 KB)<br/>params: 32x64, x32<br/>@layer1.2> color=black fillcolor="#E6E6E6" fontcolor=black ordering=out shape=box style="filled,solid"]
 	relu_2_4 [label=<<b>relu_2_4</b><br/>16x32 (2.1 KB)<br/>@layer1.3> color=black fillcolor=white fontcolor=black ordering=out shape=box style="filled,solid"]
