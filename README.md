@@ -48,4 +48,4 @@
 * [Obsidian база знаний](https://github.com/kvdep/Abstracts)
 * [Интересная библиотека](https://github.com/Ackrome/matplobblib)
 * [Сайт Михаила Коротеева с курсом по Машинному обучению](https://koroteev.site/ml/)
-* [Вся презентация курса подисциплине Численные методы](https://github.com/Ackrome/matplobblib/tree/master/theory_files/__htmls/NM/images)
+* [Вся презентация курса подисциплине Численные методы](https://github.com/Ackrome/matplobblib/tree/master/theory_files/lec)
