@@ -1,141 +1,192 @@
-
-import streamlit as st
-import torch
-import torch.nn as nn
-import pytorch_lightning as pl
-import joblib
+import os
+import requests
 import json
-import numpy as np
-import pandas as pd
-from pathlib import Path
+import subprocess
+import winreg
+import ctypes
+import re
 
+# --- CONFIGURATION ---
+ICONS_FOLDER = r"C:\Icons\VSCode"
+BASE_ICON_URL = "https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/icons/"
 
-class FocalLoss(nn.Module):
-    def __init__(self, alpha=None, gamma=2.0, reduction="mean"):
-        super().__init__()
-        if alpha is not None:
-            self.register_buffer('alpha', torch.tensor(alpha, dtype=torch.float32))
-        else:
-            self.register_buffer('alpha', None)
-        self.gamma = gamma
-        self.reduction = reduction
+# URL candidates for the mapping file (New vs Old paths)
+MAPPING_URLS = [
+    # 1. GitHub Source (New Structure 2024+) - CamelCase
+    "https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/src/iconsManifest/supportedExtensions.ts",
+    # 2. GitHub Source (Old Structure) - KebabCase
+    "https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/src/icon-manifest/supportedExtensions.ts",
+    # 3. NPM Mirror (Compiled JSON)
+    "https://unpkg.com/vscode-icons/dist/src/iconsManifest/supportedExtensions.json",
+    "https://unpkg.com/vscode-icons/dist/src/icon-manifest/supportedExtensions.json",
+]
 
-    def forward(self, logits, target):
-        ce_loss = nn.CrossEntropyLoss(weight=self.alpha, reduction="none")(logits, target)
-        pt = torch.exp(-ce_loss)
-        focal_loss = ((1 - pt) ** self.gamma) * ce_loss
-        if self.reduction == "mean":
-            return focal_loss.mean()
-        elif self.reduction == "sum":
-            return focal_loss.sum()
-        return focal_loss
+# EMERGENCY BACKUP: If internet/parsing fails completely, use this list.
+HARDCODED_MAPPING = {
+    ".py": "file_type_python", ".js": "file_type_javascript", ".ts": "file_type_typescript",
+    ".html": "file_type_html", ".css": "file_type_css", ".scss": "file_type_scss",
+    ".json": "file_type_json", ".md": "file_type_markdown", ".xml": "file_type_xml",
+    ".c": "file_type_c", ".cpp": "file_type_cpp", ".h": "file_type_cppheader",
+    ".java": "file_type_java", ".class": "file_type_class", ".go": "file_type_go",
+    ".php": "file_type_php", ".rb": "file_type_ruby", ".rs": "file_type_rust",
+    ".sh": "file_type_shell", ".bat": "file_type_bat", ".ps1": "file_type_powershell",
+    ".txt": "file_type_text", ".zip": "file_type_zip", ".7z": "file_type_zip",
+    ".pdf": "file_type_pdf", ".sql": "file_type_sql", ".lua": "file_type_lua",
+    ".cs": "file_type_csharp", ".vb": "file_type_vb", ".vue": "file_type_vue",
+    ".jsx": "file_type_reactjs", ".tsx": "file_type_reactts", ".dart": "file_type_dart",
+    ".dockerfile": "file_type_docker", ".env": "file_type_env", ".gitignore": "file_type_git",
+    ".yaml": "file_type_yaml", ".yml": "file_type_yaml", ".exe": "file_type_binary",
+}
 
-class SimpleNN(pl.LightningModule):
-    def __init__(self, input_dim, num_classes, lr=1e-3, alpha=None):
-        super().__init__()
-        self.save_hyperparameters()
-        self.model = nn.Sequential(
-            nn.Linear(input_dim, 16),
-            nn.ReLU(),
-            nn.BatchNorm1d(16),
-            nn.Linear(16, num_classes)
-        )
-        self.loss_fn = FocalLoss(alpha=alpha, gamma=2.0)
+TARGET_EXTENSIONS = list(HARDCODED_MAPPING.keys())
 
-    def forward(self, x):
-        return self.model(x)
+def setup_env():
+    if not os.path.exists(ICONS_FOLDER):
+        os.makedirs(ICONS_FOLDER)
 
-@st.cache_resource
-def load_prediction_artifacts(artifacts_dir="artifacts"):
-    artifacts_path = Path(artifacts_dir)
-    with open(artifacts_path / "metadata.json", 'r') as f:
-        metadata = json.load(f)
-    checkpoint_path = metadata["pytorch_lightning_checkpoint"]
-    model = SimpleNN.load_from_checkpoint(checkpoint_path, map_location=torch.device('cpu'))
-    model.eval()
-    scaler = joblib.load(metadata["scaler"])
-    label_encoders = {}
-    for name, path in metadata["label_encoders"].items():
-        label_encoders[name] = joblib.load(path)
-    print("Артефакты для предсказания успешно загружены.")
-    return {
-        "model": model,
-        "scaler": scaler,
-        "label_encoders": label_encoders,
-        "metadata": metadata
-    }
+def parse_ts_manifest(text):
+    """Parses the TypeScript source file using Regex."""
+    print("    [*] Parsing TypeScript source...")
+    mapping = {}
+    # Regex matches: icon: 'name', extensions: ['a', 'b']
+    pattern = r"icon:\s*['\"]([\w-]+)['\"],\s*extensions:\s*\[([^\]]+)\]"
+    matches = re.findall(pattern, text)
+    
+    for icon_name, ext_list_str in matches:
+        exts = [e.strip().strip("'").strip('"') for e in ext_list_str.split(',')]
+        full_icon_name = f"file_type_{icon_name}"
+        for ext in exts:
+            dot_ext = f".{ext}"
+            mapping[dot_ext] = full_icon_name
+    return mapping
 
-def predict_quality(age, coffee_intake, bmi, smoking, alcohol_consumption, occupation, artifacts):
-    model = artifacts["model"]
-    scaler = artifacts["scaler"]
-    label_encoders = artifacts["label_encoders"]
+def get_mapping():
+    print("[*] Attempting to download icon mappings...")
+    
+    # Try all known URLs
+    for url in MAPPING_URLS:
+        print(f"    Testing: {url} ...")
+        try:
+            r = requests.get(url, timeout=5)
+            if r.status_code == 200:
+                if url.endswith(".json"):
+                    # Parse JSON
+                    data = r.json()
+                    mapping = {}
+                    for entry in data.get('supported', []):
+                        icon = f"file_type_{entry['icon']}"
+                        for ext in entry['extensions']:
+                            mapping[f".{ext}"] = icon
+                    print(f"    [+] Success! Loaded from JSON ({len(mapping)} icons).")
+                    return mapping
+                else:
+                    # Parse TypeScript
+                    mapping = parse_ts_manifest(r.text)
+                    if mapping:
+                        print(f"    [+] Success! Parsed TS ({len(mapping)} icons).")
+                        return mapping
+        except Exception as e:
+            print(f"    [-] Failed: {e}")
 
-    num_features = np.array([[age, coffee_intake, bmi]], dtype=np.float32)
-    scaled_num_features = scaler.transform(num_features)
+    print("[!] All downloads failed. Using HARDCODED backup list.")
+    return HARDCODED_MAPPING
 
-    smoking_str = '1' if smoking else '0'
-    alcohol_str = '1' if alcohol_consumption else '0'
+def download_and_convert(icon_name):
+    local_svg = os.path.join(ICONS_FOLDER, f"{icon_name}.svg")
+    local_ico = os.path.join(ICONS_FOLDER, f"{icon_name}.ico")
 
-    smoking_encoded = label_encoders["Smoking"].transform([smoking_str])[0]
-    alcohol_encoded = label_encoders["Alcohol_Consumption"].transform([alcohol_str])[0]
-    occupation_encoded = label_encoders["Occupation"].transform([occupation])[0]
+    if os.path.exists(local_ico):
+        return local_ico
 
-    cat_features = np.array([[smoking_encoded, alcohol_encoded, occupation_encoded]], dtype=np.float32)
+    svg_url = f"{BASE_ICON_URL}{icon_name}.svg"
+    try:
+        r = requests.get(svg_url)
+        if r.status_code != 200:
+            return None
+        with open(local_svg, 'wb') as f:
+            f.write(r.content)
+    except:
+        return None
 
-    all_features = np.concatenate([scaled_num_features, cat_features], axis=1)
+    # Convert using ImageMagick
+    cmd = [
+        "magick", "convert", "-background", "none", local_svg,
+        "-define", "icon:auto-resize=256,64,48,32,16", local_ico
+    ]
+    try:
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        os.remove(local_svg)
+        print(f"    [OK] Converted: {icon_name}.ico")
+        return local_ico
+    except:
+        return None
 
-    input_tensor = torch.from_numpy(all_features).to(model.device)
-    with torch.no_grad():
-        logits = model(input_tensor)
+def get_progid(extension):
+    # 1. UserChoice
+    try:
+        path = f"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\{extension}\\UserChoice"
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, path) as key:
+            return winreg.QueryValueEx(key, "ProgId")[0]
+    except:
+        pass
+    # 2. HKCU Class
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\{extension}") as key:
+            return winreg.QueryValueEx(key, "")[0]
+    except:
+        pass
+    # 3. HKCR Class
+    try:
+        with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, extension) as key:
+            return winreg.QueryValueEx(key, "")[0]
+    except:
+        pass
+    return None
 
-    probabilities = torch.softmax(logits, dim=1).cpu().numpy().flatten()
+def apply_registry_icon(extension, icon_path):
+    progid = get_progid(extension)
+    
+    # If no ProgID, create one
+    if not progid:
+        progid = f"VSCodeStyle{extension}"
+        try:
+            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\{extension}") as key:
+                winreg.SetValue(key, "", winreg.REG_SZ, progid)
+            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\{progid}") as key:
+                winreg.SetValue(key, "", winreg.REG_SZ, f"{extension} File")
+        except:
+            pass
 
-    le_target = label_encoders["Sleep_Quality"]
-    class_names = le_target.classes_
-    result_df = pd.DataFrame([probabilities], columns=class_names)
+    if progid:
+        key_path = f"Software\\Classes\\{progid}\\DefaultIcon"
+        try:
+            winreg.CreateKey(winreg.HKEY_CURRENT_USER, key_path)
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_WRITE) as key:
+                winreg.SetValue(key, "", winreg.REG_SZ, icon_path)
+                print(f"[+] Applied: {extension} -> {progid}")
+        except Exception as e:
+            print(f"[-] Error writing registry for {extension}: {e}")
 
-    return result_df
+def main():
+    print("=== VS Code Icon Patcher (Robust) ===")
+    setup_env()
+    
+    # Get Mapping (Online or Backup)
+    mapping = get_mapping()
+    
+    print(f"\n[*] Processing extensions...")
+    
+    # Filter mapping to only include common extensions to save time
+    # (Or remove 'if' to do ALL 500+ extensions)
+    for ext, icon_name in mapping.items():
+        if ext in TARGET_EXTENSIONS or ext in HARDCODED_MAPPING:
+            icon_path = download_and_convert(icon_name)
+            if icon_path:
+                apply_registry_icon(ext, icon_path)
+    
+    print("\n[*] Refreshing Explorer...")
+    ctypes.windll.shell32.SHChangeNotify(0x08000000, 0x0000, None, None)
+    print("DONE. If icons are blank, restart your PC.")
 
-st.title('Пресказываем качество сна')
-
-artifacts = load_prediction_artifacts()
-le_occupation = artifacts["label_encoders"]["Occupation"]
-le_target = artifacts["label_encoders"]["Sleep_Quality"]
-num_classes = len(le_target.classes_)
-
-st.header('Введите параметры')
-
-age = st.slider('Возраст', 18, 100, 30)
-coffee_intake = st.slider('Потребление кофе (чашек в день)', 0, 10, 2)
-bmi = st.slider('Индекс массы тела', 15.0, 40.0, 22.5, 0.1)
-
-occupation = st.selectbox('Профессия', options=le_occupation.classes_)
-
-smoking = st.checkbox('Курите?')
-alcohol_consumption = st.checkbox('Употребляете алкоголь?')
-
-st.header('Параметры диаграммы')
-top_k = st.slider('Количество топ-к классов для отображения', min_value=1, max_value=num_classes, value=3)
-
-
-if st.button('Узнать качество сна'):
-    probabilities_df = predict_quality(
-        age, coffee_intake, bmi, smoking, alcohol_consumption, occupation, artifacts
-    )
-
-    predicted_class_name = probabilities_df.idxmax(axis=1)[0]
-    confidence = probabilities_df.max(axis=1)[0]
-
-    st.subheader("Результат предсказаний")
-
-    col1, col2 = st.columns(2)
-    col1.metric("Предсказанное качество сна", predicted_class_name)
-    col2.metric("Уверенность", f"{confidence * 100:.2f}%")
-
-    st.subheader(f'Топ {top_k} предсказаний')
-
-    top_k_preds = probabilities_df.T.sort_values(by=0, ascending=False).head(top_k)
-    top_k_preds.columns = ['Probability']
-    top_k_preds.index.name = 'Качество сна'
-
-    st.bar_chart(top_k_preds)
+if __name__ == "__main__":
+    main()

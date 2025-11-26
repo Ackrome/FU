@@ -1,0 +1,65 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Classes\.py]
+@="VSCodeStyle.py"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.py]
+@="py File"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.py\DefaultIcon]
+@="C:\\Icons\\VSCode\\file_type_python.ico"
+
+[HKEY_CURRENT_USER\Software\Classes\.js]
+@="VSCodeStyle.js"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.js]
+@="js File"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.js\DefaultIcon]
+@="C:\\Icons\\VSCode\\file_type_js.ico"
+
+[HKEY_CURRENT_USER\Software\Classes\.ts]
+@="VSCodeStyle.ts"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.ts]
+@="ts File"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.ts\DefaultIcon]
+@="C:\\Icons\\VSCode\\file_type_typescript.ico"
+
+[HKEY_CURRENT_USER\Software\Classes\.html]
+@="VSCodeStyle.html"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.html]
+@="html File"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.html\DefaultIcon]
+@="C:\\Icons\\VSCode\\file_type_html.ico"
+
+[HKEY_CURRENT_USER\Software\Classes\.css]
+@="VSCodeStyle.css"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.css]
+@="css File"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.css\DefaultIcon]
+@="C:\\Icons\\VSCode\\file_type_css.ico"
+
+[HKEY_CURRENT_USER\Software\Classes\.json]
+@="VSCodeStyle.json"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.json]
+@="json File"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.json\DefaultIcon]
+@="C:\\Icons\\VSCode\\file_type_json.ico"
+
+[HKEY_CURRENT_USER\Software\Classes\.md]
+@="VSCodeStyle.md"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.md]
+@="md File"
+
+[HKEY_CURRENT_USER\Software\Classes\VSCodeStyle.md\DefaultIcon]
+@="C:\\Icons\\VSCode\\file_type_markdown.ico"
+
