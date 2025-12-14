@@ -38,6 +38,8 @@
 * [Глубокое обучение](https://github.com/Ackrome/FU/tree/main/Course_3/DL)
 * [Информационное право](https://github.com/Ackrome/FU/tree/main/Course_3/LAW)
 * [Технологии Обработки Больших Данных](https://github.com/Ackrome/FU/tree/main/Course_3/TOBD)
+* [Эссе по ***Философии***](https://github.com/Ackrome/FU/blob/main/Course_3/LAW/%D0%9A%D0%A0_%D0%A2%D0%B8%D1%89%D0%B5%D0%BD%D0%BA%D0%BE%D0%9F%D0%9C23-1.pdf)
+* [Эссе по ***Информационному праву***](https://github.com/Ackrome/FU/blob/main/Course_3/LAW/%D0%9A%D0%A0_%D0%A2%D0%B8%D1%89%D0%B5%D0%BD%D0%BA%D0%BE%D0%9F%D0%9C23-1.pdf)
 
 # Курсовые работы
 * [Сравнение ансамблевых методов решения классических ml задач с методом TabPFN](https://github.com/Ackrome/Course-work-TabFPN/tree/main)
