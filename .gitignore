@@ -21,3 +21,6 @@
 **/checkpoints
 **/data_**
 **/gan_samples
+**/dumplings
+**/launches
+**/submissions
