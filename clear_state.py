@@ -1,7 +1,7 @@
 import json
 
 # Use the exact path to the file you are opening in VS Code
-file_path = r"C:\Users\Rog G16\Downloads\Copy_of_icepyx2.ipynb"
+file_path = r"C:\Projects\FU\Course_3\NLP\04_transformers\04_1_encoding_finetuning.ipynb"
 
 with open(file_path, 'r', encoding='utf-8') as f:
     nb = json.load(f)
