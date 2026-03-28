@@ -36,3 +36,6 @@ Course_3/SA(C)/sw.tar.bz2
 **.zip
 **.graphml
 Course_3/CV/logs/
+Course_3/C/build/*
+**.vscode
+build
