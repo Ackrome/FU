@@ -39,3 +39,5 @@ Course_3/CV/logs/
 Course_3/C/build/*
 **.vscode
 build
+**.env
+**/chroma
