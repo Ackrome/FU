@@ -41,3 +41,6 @@ Course_3/C/build/*
 build
 **.env
 **/chroma
+Course_3/C/att_2/my_songs
+Course_3/C/att_2/docs
+graphify*
