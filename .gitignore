@@ -40,7 +40,15 @@ Course_3/C/build/*
 **.vscode
 build
 **.env
+tools/node_modules/
+output/book_reader/
+output/playwright/
 **/chroma
 Course_3/C/att_2/my_songs
 Course_3/C/att_2/docs
 graphify*
+.playwright-cli
+tools
+docs
+tmp
+output
