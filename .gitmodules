@@ -4,3 +4,6 @@
 [submodule "Course_2/ResearchPappers/Course-work-TabFPN"]
 	path = Course_2/ResearchPappers/Course-work-TabFPN
 	url = https://github.com/Ackrome/Course-work-TabFPN
+[submodule "Course_4/SEMTECH/WIKIBASE"]
+	path = Course_4/SEMTECH/WIKIBASE
+	url = https://github.com/Ackrome/WIKIBASE.git
