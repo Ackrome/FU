@@ -6,4 +6,4 @@
 	url = https://github.com/Ackrome/Course-work-TabFPN
 [submodule "Course_4/SEMTECH/WIKIBASE"]
 	path = Course_4/SEMTECH/WIKIBASE
-	url = https://github.com/Ackrome/WIKIBASE.git
+	url = https://github.com/kvdep/WIKIBASE
